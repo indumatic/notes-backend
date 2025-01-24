@@ -19,6 +19,9 @@ let notes = [
   }
 ]
 
+// activate express's json parser to porccess POST requests
+app.use(express.json())
+
 app.get('/', (request, response) => {
     response.send('<h1>Hello World!<h1/>')
 })
@@ -41,6 +44,19 @@ app.delete('/api/notes/:id',(request, response) => {
     notes = notes.filter(note => note.id !== id)
 
     response.status(204).end()   
+})
+
+app.post('/api/notes', (request, response) => {
+    const maxId = notes.length > 0
+        ? Math.max(...notes.map(n => Number(n.id)))
+        : 0
+        
+    const note = request.body
+    note.id = String(maxId + 1)
+
+    notes = notes.concat(note)
+
+    response.json(note)
 })
 
 const PORT = 3001
