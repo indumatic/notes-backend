@@ -1,23 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const mongoose = require('mongoose')
-const dotenv = require('dotenv')
-
-dotenv.config()
-
-const url = process.env.MONGODB_URI
-
-mongoose.set('strictQuery',false)
-mongoose.connect(url)
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
-
-const Note = mongoose.model('Note', noteSchema)
-
+const Note = require('./models/note')
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -60,10 +45,6 @@ app.delete('/api/notes/:id',(request, response) => {
     response.status(204).end()   
 })
 
-const generateId = () => notes.length > 0
-                            ? Math.max(...notes.map(n => Number(n.id))) + 1
-                            : 1
-
 app.post('/api/notes', (request, response) => {
     const body = request.body
 
@@ -71,17 +52,16 @@ app.post('/api/notes', (request, response) => {
             error: 'content missing'
         })
         
-    const note = {
+    const note = new Note({
         content: body.content,
         important: Boolean(body.important) || false,
-        id: generateId(),
-    }
+    })
 
-    notes = notes.concat(note)
-
-    response.json(note)
+    note.save().then(savedNote => {
+      response.json(savedNote)
+    })
+    
 })
-
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
@@ -89,7 +69,7 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
