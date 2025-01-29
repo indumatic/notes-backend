@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const Note = require('./models/note')
+const note = require('./models/note')
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -64,6 +65,23 @@ app.delete('/api/notes/:id',(request, response) => {
   notes = notes.filter(note => note.id !== id)
 
   response.status(204).end()   
+})
+
+app.put('/api/notes/:id', (request, response, next) => {
+  const body = request.body
+
+  const note = {
+    content: body.content,
+    important: body.important
+  }
+  
+  Note
+    .findByIdAndUpdate(request.params.id, note, {new:true})
+    .then(updatedNote => {
+      response.json(updatedNote)
+    })
+    .catch(error => next(error))
+
 })
 
 const unknownEndpoint = (request, response) => {
