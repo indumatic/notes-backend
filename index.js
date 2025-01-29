@@ -3,7 +3,6 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const Note = require('./models/note')
-const note = require('./models/note')
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -26,7 +25,7 @@ app.get('/', (request, response) => {
 app.get('/api/notes', (request, response) => {
     Note
       .find({})
-      .then(notes => 
+      .then(notes =>
         response.json(notes))
 })
 
