@@ -36,5 +36,6 @@ export default [
         'never'
       ],
     },
+    ignores: ["dist/**"]
   },  
 ]
